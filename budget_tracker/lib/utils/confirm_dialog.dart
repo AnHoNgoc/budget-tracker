@@ -1,8 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ConfirmDialog {
-  /// Hiển thị dialog xác nhận với title và content tùy ý
-  /// Trả về true nếu người dùng nhấn "Confirm", false nếu nhấn "Cancel"
   static Future<bool> show(
       BuildContext context, {
         required String title,
@@ -10,23 +10,28 @@ class ConfirmDialog {
         String cancelText = 'Cancel',
         String confirmText = 'Confirm',
       }) async {
-    return await showDialog<bool>(
+    return await showCupertinoDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
         title: Text(title),
-        content: Text(content),
+        content: Padding(
+          padding: EdgeInsets.only(top: 8.0.r),
+          child: Text(content),
+        ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context, false),
+            isDestructiveAction: false,
             child: Text(cancelText),
           ),
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context, true),
+            isDestructiveAction: true,
             child: Text(confirmText),
           ),
         ],
       ),
     ) ??
-        false; // Nếu dialog bị dismiss, trả về false
+        false;
   }
 }

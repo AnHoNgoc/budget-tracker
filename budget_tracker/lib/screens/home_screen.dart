@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: const Color(0xFF5E00B8),
         onPressed: () => _showAddTransactionDialog(context),
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: const Color(0xFF5E00B8),
         centerTitle: true,
         title: const Text("Budget Tracker", style: TextStyle(color: Colors.white)),
         actions: [

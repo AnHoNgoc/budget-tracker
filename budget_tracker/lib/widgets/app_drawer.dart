@@ -7,7 +7,8 @@ import '../screens/login.dart';
 import '../services/auth_service.dart';
 import '../utils/confirm_dialog.dart';
 import '../utils/password_dialog.dart';
-import '../utils/show_snackbar.dart';
+import '../utils/show_app_dialog.dart';
+import '../utils/show_app_dialog_auto_close.dart';
 
 class AppDrawer extends StatefulWidget {
   final VoidCallback onLogout;
@@ -26,9 +27,9 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  void onResetButtonPressed(String userId) async {
-    // 1. Show confirm dialog và await, cần context
-    bool confirmed = await ConfirmDialog.show(
+  Future<void> onResetButtonPressed(String userId) async {
+    // 1. Hiển thị confirm dialog và await
+    final bool confirmed = await ConfirmDialog.show(
       context,
       title: 'Reset Amounts',
       content: 'Are you sure you want to reset all amounts?',
@@ -36,30 +37,41 @@ class _AppDrawerState extends State<AppDrawer> {
       confirmText: 'Reset',
     );
 
-    if (!mounted || !confirmed) return; // check mounted
+    if (!mounted || !confirmed) return;
 
-    // 2. Thực hiện async, không dùng context
-    bool success = await AuthService().resetAmounts(userId);
+    // 2. Thực hiện async reset amounts, không dùng context
+    bool success = false;
+    try {
+      success = await AuthService().resetAmounts(userId);
+    } catch (e) {
+      success = false;
+    }
 
-    if (!mounted) return; // check mounted trước khi dùng context
-
-    // 3. Dùng context sau khi chắc chắn mounted
-    showAppSnackBar(context,
-        success ? 'User data reset successfully' : 'Error resetting user data',
-        success ? Colors.green : Colors.red);
+    if (!mounted) return;
 
     if (success) {
-      Navigator.pushReplacement(
+       showAppDialogAutoClose(
         context,
-        MaterialPageRoute(builder: (_) => const Dashboard()),
+        message: 'User data reset successfully!',
+        onClosed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const Dashboard()),
+          );
+        },
+      );
+    } else {
+      showAppDialog(
+        context,
+        message: 'Error resetting user data',
+        type: DialogType.error,
       );
     }
   }
 
-
-  void onDeleteAccountPressed() async {
-
-    bool confirmed = await ConfirmDialog.show(
+  Future<void> onDeleteAccountPressed() async {
+    // 1. Confirm trước khi xóa
+    final bool confirmed = await ConfirmDialog.show(
       context,
       title: 'Delete Account',
       content: 'Are you sure you want to delete your account? This action cannot be undone.',
@@ -69,23 +81,40 @@ class _AppDrawerState extends State<AppDrawer> {
 
     if (!mounted || !confirmed) return;
 
-    // 2. Nếu cần password để re-authenticate, show dialog nhập password ở đây
-    String? password = await PasswordDialog.show(context);
+    // 2. Nếu cần password để re-authenticate
+    final String? password = await PasswordDialog.show(context);
+
+    // Nếu user hủy hoặc không nhập password
+    if (!mounted || password == null || password.isEmpty) return;
 
     // 3. Gọi service xóa tài khoản
-    bool success = await AuthService().deleteUser(password: password);
+    bool success = false;
+    try {
+      success = await AuthService().deleteUser(password: password);
+    } catch (e) {
+      success = false;
+    }
 
     if (!mounted) return;
 
-    // 4. Hiển thị snackbar và điều hướng về LoginScreen nếu xóa thành công
+    // 4. Hiển thị dialog dựa trên kết quả
     if (success) {
-      showAppSnackBar(context, 'Account deleted successfully', Colors.green);
-      Navigator.pushReplacement(
+       showAppDialogAutoClose(
         context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        message: 'Account deleted successfully!',
+        onClosed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        },
       );
     } else {
-      showAppSnackBar(context, 'Error deleting account', Colors.red);
+       showAppDialog(
+        context,
+        message: 'Error deleting account',
+        type: DialogType.error,
+      );
     }
   }
 
@@ -121,7 +150,11 @@ class _AppDrawerState extends State<AppDrawer> {
               if (user != null) {
                 onResetButtonPressed(user.uid);
               } else {
-                showAppSnackBar(context, 'No user is signed in', Colors.red);
+                showAppDialog(
+                  context,
+                  message: 'No user is signed in',
+                  type: DialogType.error,
+                );
               }
             },
           ),

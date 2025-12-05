@@ -1,23 +1,26 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class LogoutDialog {
   static Future<bool> showLogoutConfirmationDialog(BuildContext context) async {
-    return await showDialog<bool>(
+    return await showCupertinoDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
         title: const Text('Confirmation'),
         content: const Text('Are you sure you want to log out?'),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            isDefaultAction: true,
+            child: const Text('Cancel'), // nút chuẩn màu xanh iOS
           ),
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Log Out'),
+            isDestructiveAction: true,
+            child: const Text('Log Out'), // màu đỏ chuẩn iOS
           ),
         ],
       ),
-    ) ?? false;
+    ) ??
+        false;
   }
 }

@@ -3,12 +3,14 @@ import 'package:budget_tracker/screens/sign_up.dart';
 import 'package:budget_tracker/utils/app_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lottie/lottie.dart';
 
 import '../services/auth_service.dart';
-import '../utils/input_decoration.dart';
-import '../utils/show_snackbar.dart';
+import '../utils/app_text_field.dart';
+import '../utils/show_app_dialog.dart';
 import 'dashboard.dart';
+
+import 'package:flutter/cupertino.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,11 +20,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
-
   bool _isLoader = false;
 
   @override
@@ -37,106 +37,106 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoader = true);
 
-    var data = {
-      "email": _emailController.text,
-      "password": _passwordController.text,
-    };
-
     try {
-      String? result = await _authService.loginUser(data);
+      String? result = await AuthService().loginUser({
+        "email": _emailController.text,
+        "password": _passwordController.text,
+      });
 
       if (!mounted) return;
 
       if (result == null) {
-        Navigator.pushAndRemoveUntil(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
-              (route) => false,
+          CupertinoPageRoute(builder: (_) => const Dashboard()),
         );
       } else {
-        showAppSnackBar(context, result, Colors.red);
+        showAppDialog(context, message: result, type: DialogType.error);
       }
     } catch (e) {
       if (!mounted) return;
-      showAppSnackBar(context, 'Error: $e', Colors.red);
+      showAppDialog(context, message: '$e', type: DialogType.error);
     } finally {
-      if (mounted) {
-        setState(() => _isLoader = false);
-      }
+      if (mounted) setState(() => _isLoader = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: const Color(0xFF252634),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              SizedBox(height: 80.h),
-              SizedBox(
-                height: 300.h,
-                child: Lottie.asset('asset/lottie/login.json', fit: BoxFit.contain),
-              ),
-              SizedBox(height: 50.h),
-              TextFormField(
-                controller: _emailController,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.emailAddress,
-                decoration: AppInputDecoration.build("Email", Icons.email),
-                validator: AppValidator.validateEmail,
-              ),
-              SizedBox(height: 16.h),
-              TextFormField(
-                controller: _passwordController,
-                style: const TextStyle(color: Colors.white),
-                decoration: AppInputDecoration.build("Password", Icons.password),
-                validator: AppValidator.validatePassword,
-                obscureText: true,
-              ),
-              SizedBox(height: 40.h),
-              Container(
-                height: 50.h,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF3DDC97), // xanh ngọc dịu, cao cấp
-                      Color(0xFFFF8A00), // cam mềm, nổi vừa đủ
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TextButton(
-                  onPressed: _isLoader ? null : _submitForm,
-                  child: _isLoader
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                    "Login",
-                    style: TextStyle(color: Colors.white, fontSize: 22.sp),
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                SizedBox(height: 50.h),
+                SizedBox(
+                  height: 250.h,
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.person_circle,
+                      size: 120.sp,
+                      color: CupertinoColors.systemGrey,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20.h),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                  );
-                },
-                child: Text(
-                  "Create New Account",
-                  style: TextStyle(color: const Color(0xFF3DDC97), fontSize: 22.sp),
+                SizedBox(height: 40.h),
+                AppTextField(
+                  controller: _emailController,
+                  placeholder: "Email",
+                  keyboardType: TextInputType.emailAddress,
+                  validator: AppValidator.validateEmail,
                 ),
-              ),
-            ],
+                SizedBox(height: 20.h),
+                AppTextField(
+                  controller: _passwordController,
+                  placeholder: "Password",
+                  isPassword: true,
+                  validator: AppValidator.validatePassword,
+                ),
+                SizedBox(height: 40.h),
+                SizedBox(
+                  height: 55.h,
+                  child: CupertinoButton.filled(
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(10.r),
+                    onPressed: _isLoader ? null : _submitForm,
+                    child: _isLoader
+                        ? const CupertinoActivityIndicator(color: Colors.white)
+                        : Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(builder: (_) => const SignUpScreen()),
+                    );
+                  },
+                  child: Text(
+                    "Create New Account",
+                    style: TextStyle(
+                      color: const Color(0xFF3DDC97),
+                      fontSize: 20.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-

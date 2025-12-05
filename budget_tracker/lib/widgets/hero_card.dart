@@ -56,7 +56,7 @@ class HeroCardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue.shade900,
+      color: const Color(0xFF5E00B8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,7 +66,7 @@ class HeroCardBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Total Balance",
+                  "Total",
                   style: TextStyle(
                     fontSize: 20.sp,
                     color: Colors.white,

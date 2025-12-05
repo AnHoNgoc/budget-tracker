@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/auth_service.dart';
 import '../utils/app_validator.dart';
 import '../utils/input_change_password.dart';
-import '../utils/show_snackbar.dart';
+import '../utils/show_app_dialog.dart';
+import '../utils/show_app_dialog_auto_close.dart';
 import 'dashboard.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -22,10 +24,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   bool _isLoading = false;
 
-  bool _isOldPasswordObscure = true;
-  bool _isNewPasswordObscure = true;
-  bool _isConfirmPasswordObscure = true;
-
   @override
   void dispose() {
     _oldPasswordController.dispose();
@@ -36,154 +34,110 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
 
       final result = await AuthService().changePassword(
         oldPassword: _oldPasswordController.text.trim(),
         newPassword: _newPasswordController.text.trim(),
       );
 
-      if (!mounted) return; // ✅ FIX QUAN TRỌNG
+      if (!mounted) return;
 
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
 
       if (result == null) {
-        showAppSnackBar(context, "Password changed successfully!", Colors.green);
-        Navigator.pushAndRemoveUntil(
+        showAppDialogAutoClose(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
-              (route) => false,
+          message: "Password changed successfully!",
+          onClosed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoPageRoute(builder: (_) => const Dashboard()),
+                  (route) => false,
+            );
+          },
         );
       } else {
-        showAppSnackBar(context, result, Colors.red);
+        showAppDialog(context, message: result, type: DialogType.error);
       }
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue.shade900,
-        title: const Text('Change Password', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
-        centerTitle: true, // 👈 Thêm dòng này
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+            child: Icon(CupertinoIcons.back, size: 28.sp),
+            onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoPageRoute(builder: (_) => const Dashboard()),
+                  (route) => false,
+            );
+          }
+        ),
+        middle: Text(
+          'Change Password',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 25.sp,
+          ),
+        ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              SizedBox(height: 40.h),
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.0.r),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                SizedBox(height: 40.h),
 
-              Image.asset(
-                'asset/images/password.png',
-                width: 150,
-                height: 170,
-                fit: BoxFit.contain,
-              ),
-
-              SizedBox(height: 60.h),
-
-              TextFormField(
-                controller: _oldPasswordController,
-                obscureText: _isOldPasswordObscure,
-                decoration: AppInputChangePassword.build(
-                  'Old Password',
-                  _isOldPasswordObscure ? Icons.visibility_off : Icons.visibility,
-                ).copyWith(
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isOldPasswordObscure ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isOldPasswordObscure = !_isOldPasswordObscure;
-                      });
-                    },
-                  ),
+                Image.asset(
+                  'asset/images/password.png',
+                  width: 150,
+                  height: 170,
+                  fit: BoxFit.contain,
                 ),
-                validator: AppValidator.validatePassword,
-              ),
 
-              SizedBox(height: 20.h),
+                SizedBox(height: 60.h),
 
-              TextFormField(
-                controller: _newPasswordController,
-                obscureText: _isNewPasswordObscure,
-                decoration: AppInputChangePassword.build(
-                  'New Password',
-                  Icons.lock_outline, // icon mặc định
-                ).copyWith(
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isNewPasswordObscure ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isNewPasswordObscure = !_isNewPasswordObscure;
-                      });
-                    },
-                  ),
+                InputChangePassword(
+                  controller: _oldPasswordController,
+                  placeholder: "Old Password",
+                  validator: AppValidator.validatePassword,
                 ),
-                validator: (value) => AppValidator.validateNewPassword(
-                  value,
-                  _oldPasswordController.text,
-                ),
-              ),
-              SizedBox(height: 20.h),
 
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _isConfirmPasswordObscure,
-                decoration: AppInputChangePassword.build(
-                  'Confirm New Password',
-                  Icons.lock_outline,
-                ).copyWith(
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isConfirmPasswordObscure ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isConfirmPasswordObscure = !_isConfirmPasswordObscure;
-                      });
-                    },
-                  ),
-                ),
-                validator: (value) => AppValidator.validateConfirmPassword(
-                  value,
-                  _newPasswordController.text,
-                ),
-              ),
+                SizedBox(height: 20.h),
 
-              SizedBox(height: 40.h),
+                InputChangePassword(
+                  controller: _newPasswordController,
+                  placeholder: "New Password",
+                  validator: (value) =>
+                      AppValidator.validateNewPassword(value, _oldPasswordController.text),
+                ),
 
-              SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton(
+                SizedBox(height: 20.h),
+
+                InputChangePassword(
+                  controller: _confirmPasswordController,
+                  placeholder: "Confirm New Password",
+                  validator: (value) =>
+                      AppValidator.validateConfirmPassword(value, _newPasswordController.text),
+                ),
+
+                SizedBox(height: 40.h),
+
+                CupertinoButton.filled(
                   onPressed: _isLoading ? null : _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade900,
-                    foregroundColor: Colors.white,
-                    textStyle: TextStyle(fontSize: 18.sp),
-                  ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text("Change Password", style: TextStyle(fontSize: 20.sp)),
+                      ? const CupertinoActivityIndicator(color: Colors.black) // <-- đổi màu ở đây
+                      : const Text("Change Password"),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

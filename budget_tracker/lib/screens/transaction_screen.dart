@@ -1,7 +1,7 @@
 import 'package:budget_tracker/widgets/category_list.dart';
 import 'package:budget_tracker/widgets/time_line_month.dart';
 import 'package:budget_tracker/widgets/type_tab_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -25,34 +25,61 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Expansive")
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        automaticallyImplyLeading: false,
+        middle: Text(
+          "Expenses",
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 25.sp),
+        ),
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 15.h),
-          TimeLineMonth(
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  monthYear = value;
-                });
-              }
-            },
-          ),
-          CategoryList(
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  category = value;
-                });
-              }
-            },
-          ),
-          TypeTabBar(category: category, monthYear: monthYear),
-        ],
+
+      child: SafeArea(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  SizedBox(height: 15.h),
+
+                  /// Month Timeline
+                  TimeLineMonth(
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => monthYear = value);
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  /// Category List
+                  CategoryList(
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => category = value);
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: 10.h),
+                ],
+              ),
+            ),
+
+            /// Main Transaction Content
+            SliverFillRemaining(
+              hasScrollBody: true,
+              child: TypeTabBar(
+                category: category,
+                monthYear: monthYear,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

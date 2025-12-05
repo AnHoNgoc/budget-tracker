@@ -59,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAvPq3wMpLuzDWVAiwiY-MP4fQem406qmM',
-    appId: '1:955089983559:ios:27487f5128a2b6e791b962',
+    appId: '1:955089983559:ios:afd592fecb77627d91b962',
     messagingSenderId: '955089983559',
     projectId: 'budgettracker-d7865',
     storageBucket: 'budgettracker-d7865.appspot.com',
-    iosBundleId: 'com.example.budgetTracker',
+    iosBundleId: 'com.ngocanho.budgettracker',
   );
 }

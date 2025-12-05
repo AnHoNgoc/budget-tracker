@@ -1,9 +1,11 @@
 import 'package:budget_tracker/widgets/category_dropdown.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/transaction_service.dart';
 import '../utils/app_validator.dart';
-import '../utils/show_snackbar.dart';
+import '../utils/show_app_dialog.dart';
+
 
 class AddTransactionForm extends StatefulWidget {
   const AddTransactionForm({super.key});
@@ -15,7 +17,7 @@ class AddTransactionForm extends StatefulWidget {
 class _AddTransactionFormState extends State<AddTransactionForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  String _type = "credit";
+  String _type = "credit"; // PHẢI đúng key “credit” hoặc “debit”
   String _category = "Others";
   bool _isLoader = false;
 
@@ -24,9 +26,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoader = true;
-      });
+      setState(() => _isLoader = true);
 
       try {
         await TransactionService().addTransaction(
@@ -35,15 +35,14 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
           type: _type,
           category: _category,
         );
-        if (!mounted) return;
 
+        if (!mounted) return;
         Navigator.pop(context);
+
       } catch (e) {
-        showAppSnackBar(context, 'Error: $e', Colors.red);
+        showAppDialog(context, message: '$e', type: DialogType.error);
       } finally {
-        setState(() {
-          _isLoader = false;
-        });
+        if (mounted) setState(() => _isLoader = false);
       }
     }
   }
@@ -57,61 +56,89 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _titleEditController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: AppValidator.isEmptyCheck,
-              decoration: const InputDecoration(labelText: "Title"),
-            ),
-            TextFormField(
-              controller: _amountEditController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: AppValidator.isEmptyCheck,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Amount"),
-            ),
-            CategoryDropdown(
-              categoryType: _category,
-              onChanged: (String? value) {
-                if (value != null) {
-                  setState(() {
-                    _category = value;
-                  });
-                }
-              },
-            ),
-            DropdownButtonFormField(
-              value: _type,
-              items: const [
-                DropdownMenuItem(value: "credit", child: Text("Credit")),
-                DropdownMenuItem(value: "debit", child: Text("Debit"))
+    return CupertinoScrollbar(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(8.w),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+
+                /// Title
+                TextFormField(
+                  controller: _titleEditController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: AppValidator.isEmptyCheck,
+                  decoration: const InputDecoration(labelText: "Title"),
+                ),
+                SizedBox(height: 10.h),
+
+                /// Amount
+                TextFormField(
+                  controller: _amountEditController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: AppValidator.isEmptyCheck,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Amount"),
+                ),
+                SizedBox(height: 10.h),
+
+                /// Category
+                CategoryDropdown(
+                  categoryType: _category,
+                  onChanged: (value) {
+                    if (value != null) setState(() => _category = value);
+                  },
+                ),
+                SizedBox(height: 15.h),
+
+                /// FIXED — SegmentedControl credit/debit
+                CupertinoSegmentedControl<String>(
+                  padding: EdgeInsets.symmetric(vertical: 10.h),
+                  groupValue: _type,
+                  selectedColor: const Color(0xFF5E00B8),
+                  unselectedColor: Colors.white,
+                  borderColor: const Color(0xFF5E00B8),
+                  children: {
+                    "credit": Padding(
+                      padding: EdgeInsets.all(12.h),
+                      child: const Text("Credit"),
+                    ),
+                    "debit": Padding(
+                      padding: EdgeInsets.all(12.h),
+                      child: const Text("Debit"),
+                    ),
+                  },
+                  onValueChanged: (value) {
+                    setState(() => _type = value);
+                  },
+                ),
+
+                SizedBox(height: 20.h),
+
+                /// iOS button
+                SizedBox(
+                  height: 50.h,
+                  child: CupertinoButton.filled(
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(10.r),
+                    onPressed: _isLoader ? null : _submitForm,
+                    child: _isLoader
+                        ? const CupertinoActivityIndicator(color: Colors.white)
+                        : Text(
+                      "Add Transaction",
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
               ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _type = value;
-                  });
-                }
-              },
             ),
-            SizedBox(height: 16.h),
-            ElevatedButton(
-              onPressed: () {
-                if (!_isLoader) {
-                  _submitForm();
-                }
-              },
-              child: _isLoader
-                  ? const Center(child: CircularProgressIndicator())
-                  : const Text("Add Transaction"),
-            ),
-          ],
+          ),
         ),
       ),
     );

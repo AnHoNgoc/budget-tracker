@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChartScreen extends StatefulWidget {
@@ -55,9 +55,7 @@ class _ChartScreenState extends State<ChartScreen> {
     } catch (e) {
       debugPrint("Error fetching chart data: $e");
       if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
+        setState(() => isLoading = false);
       }
     }
   }
@@ -65,58 +63,92 @@ class _ChartScreenState extends State<ChartScreen> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const CupertinoPageScaffold(
+        child: Center(child: CupertinoActivityIndicator()),
       );
     }
 
     final months = creditByMonth.keys.toSet().union(debitByMonth.keys.toSet()).toList();
-    months.sort(); // sort tháng theo tên hoặc "yyyy-MM"
+    months.sort();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(
           "Chart",
-          style: TextStyle(color: Colors.white), // đổi màu chữ
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 25.sp,
+          ),
         ),
-        backgroundColor: Colors.blue.shade900,
-        centerTitle: true, // căn giữa title
+        automaticallyImplyLeading: false, // bỏ nút back
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0.r),
-        child: BarChart(
-          BarChartData(
-            alignment: BarChartAlignment.spaceAround,
-            maxY: getMaxY(),
-            titlesData: FlTitlesData(
-              leftTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false), // tắt trục dọc
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: (value, _) {
-                    int index = value.toInt();
-                    if (index < 0 || index >= months.length) return const Text('');
-                    return Text(months[index], style: TextStyle(fontSize: 10.sp));
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.r),
+          child: Container(
+            padding: EdgeInsets.all(16.r),
+            decoration: BoxDecoration(
+              color: CupertinoColors.white,
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: getMaxY(),
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, _) {
+                        int index = value.toInt();
+                        if (index < 0 || index >= months.length) return const Text('');
+                        return Text(
+                          months[index],
+                          style: TextStyle(fontSize: 10.sp, color: CupertinoColors.systemGrey),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                barGroups: List.generate(
+                  months.length,
+                      (index) {
+                    final month = months[index];
+                    return BarChartGroupData(
+                      x: index,
+                      barsSpace: 8,
+                      barRods: [
+                        BarChartRodData(
+                          toY: creditByMonth[month] ?? 0,
+                          width: 12.w,
+                          color: CupertinoColors.activeGreen,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        BarChartRodData(
+                          toY: debitByMonth[month] ?? 0,
+                          width: 12.w,
+                          color: CupertinoColors.systemRed,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                      ],
+                    );
                   },
                 ),
               ),
             ),
-            barGroups: List.generate(months.length, (index) {
-              final month = months[index];
-              final credit = creditByMonth[month] ?? 0;
-              final debit = debitByMonth[month] ?? 0;
-
-              return BarChartGroupData(
-                x: index,
-                barRods: [
-                  BarChartRodData(toY: credit, color: Colors.green, width: 12.w),
-                  BarChartRodData(toY: debit, color: Colors.red, width: 12.w),
-                ],
-                barsSpace: 4,
-              );
-            }),
           ),
         ),
       ),
@@ -124,8 +156,14 @@ class _ChartScreenState extends State<ChartScreen> {
   }
 
   double getMaxY() {
-    double maxCredit = creditByMonth.values.isEmpty ? 0 : creditByMonth.values.reduce((a, b) => a > b ? a : b);
-    double maxDebit = debitByMonth.values.isEmpty ? 0 : debitByMonth.values.reduce((a, b) => a > b ? a : b);
-    return (maxCredit > maxDebit ? maxCredit : maxDebit) * 1.2; // padding 20%
+    double maxCredit = creditByMonth.values.isEmpty
+        ? 0
+        : creditByMonth.values.reduce((a, b) => a > b ? a : b);
+
+    double maxDebit = debitByMonth.values.isEmpty
+        ? 0
+        : debitByMonth.values.reduce((a, b) => a > b ? a : b);
+
+    return (maxCredit > maxDebit ? maxCredit : maxDebit) * 1.2;
   }
 }

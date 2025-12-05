@@ -1,11 +1,13 @@
 import 'package:budget_tracker/screens/login.dart';
 import 'package:budget_tracker/services/auth_service.dart';
 import 'package:budget_tracker/utils/app_validator.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../utils/app_text_field.dart';
+import '../utils/show_app_dialog.dart';
+import '../utils/show_app_dialog_auto_close.dart';
 
-import '../utils/input_decoration.dart';
-import '../utils/show_snackbar.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,6 +18,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -34,153 +37,163 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoader = true);
+    if (!_formKey.currentState!.validate()) return;
 
-      var data = {
-        "username": _userNameController.text,
-        "email": _emailController.text,
-        "password": _passwordController.text,
-        "remainingAmount": 0,
-        "totalCredit": 0,
-        "totalDebit": 0,
-      };
+    setState(() => _isLoader = true);
 
-      try {
-        String? errorMessage = await _authService.createUser(data);
+    var data = {
+      "username": _userNameController.text,
+      "email": _emailController.text,
+      "password": _passwordController.text,
+      "remainingAmount": 0,
+      "totalCredit": 0,
+      "totalDebit": 0,
+    };
 
-        if (!mounted) return; // ✅ FIX WARNING
+    try {
+      final result = await _authService.createUser(data);
 
-        if (errorMessage == null) {
-          _userNameController.clear();
-          _emailController.clear();
-          _passwordController.clear();
-          _confirmPasswordController.clear();
+      if (!mounted) return;
 
-          showAppSnackBar(context, 'User created successfully!', Colors.green);
+      if (result == null) {
+        _userNameController.clear();
+        _emailController.clear();
+        _passwordController.clear();
+        _confirmPasswordController.clear();
 
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-          );
-        } else {
-          showAppSnackBar(context, errorMessage, Colors.red);
-        }
-      } catch (e) {
-        if (!mounted) return; // ✅ FIX WARNING
-        showAppSnackBar(context, 'Error: $e', Colors.red);
-      } finally {
-        if (mounted) {
-          setState(() => _isLoader = false);
-        }
+        showAppDialogAutoClose(
+          context,
+          message: "User created successfully!",
+          onClosed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+            );
+          },
+        );
+
+      } else {
+        showAppDialog(context, message: result, type: DialogType.error);
       }
+    } catch (e) {
+      if (!mounted) return;
+      showAppDialog(context, message:  'Error: $e', type: DialogType.error);
+    } finally {
+      if (mounted) setState(() => _isLoader = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
+    return CupertinoPageScaffold(
       backgroundColor: const Color(0xFF252634),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.all(16.w),
-            children: [
-              SizedBox(height: 80.h),
-              Center(
-                child: SizedBox(
-                  width: 250.w,
-                  child: Text(
-                    "Create New Account",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 28.sp, fontWeight: FontWeight.bold),
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                SizedBox(height: 50.h),
+
+                /// ICON
+                SizedBox(
+                  height: 200.h,
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.person_crop_circle_fill_badge_plus,
+                      size: 120.sp,
+                      color: CupertinoColors.systemGrey,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 50.h),
-              TextFormField(
-                controller: _userNameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: AppInputDecoration.build("UserName", Icons.person),
-                validator: AppValidator.validateUser,
-              ),
-              SizedBox(height: 16.h),
-              TextFormField(
-                controller: _emailController,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.emailAddress,
-                decoration: AppInputDecoration.build("Email", Icons.email),
-                validator: AppValidator.validateEmail,
-              ),
-              SizedBox(height: 16.h),
-              TextFormField(
-                controller: _passwordController,
-                style: const TextStyle(color: Colors.white),
-                decoration: AppInputDecoration.build("Password", Icons.password),
-                validator: AppValidator.validatePassword,
-                obscureText: true,
-              ),
-              SizedBox(height: 16.h),
-              TextFormField(
-                controller: _confirmPasswordController,
-                style: const TextStyle(color: Colors.white),
-                decoration: AppInputDecoration.build("Confirm Password", Icons.password_outlined),
-                validator: (value) => AppValidator.validateConfirmPassword(value, _passwordController.text),
-                obscureText: true,
-              ),
-              SizedBox(height: 40.h),
-              SizedBox(
-                height: 50.h,
-                width: double.infinity,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF3DDC97), // xanh ngọc dịu
-                        Color(0xFFFF8A00), // cam mềm
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
+
+                SizedBox(height: 30.h),
+
+                /// Username
+                AppTextField(
+                  controller: _userNameController,
+                  placeholder: "Username",
+                  validator: AppValidator.validateUser,
+                ),
+
+                SizedBox(height: 20.h),
+
+                /// Email
+                AppTextField(
+                  controller: _emailController,
+                  placeholder: "Email",
+                  keyboardType: TextInputType.emailAddress,
+                  validator: AppValidator.validateEmail,
+                ),
+
+                SizedBox(height: 20.h),
+
+                /// Password
+                AppTextField(
+                  controller: _passwordController,
+                  placeholder: "Password",
+                  isPassword: true,
+                  validator: AppValidator.validatePassword,
+                ),
+
+                SizedBox(height: 20.h),
+
+                /// Confirm Password
+                AppTextField(
+                  controller: _confirmPasswordController,
+                  placeholder: "Confirm Password",
+                  isPassword: true,
+                  validator: (value) =>
+                      AppValidator.validateConfirmPassword(
+                        value,
+                        _passwordController.text,
                       ),
-                    ],
-                  ),
-                  child: TextButton(
+                ),
+
+                SizedBox(height: 40.h),
+
+                /// Create Button
+                SizedBox(
+                  height: 55.h,
+                  child: CupertinoButton.filled(
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(10.r),
                     onPressed: _isLoader ? null : _submitForm,
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                    ),
                     child: _isLoader
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const CupertinoActivityIndicator(color: Colors.white)
                         : Text(
-                      "Create",
+                      "Create Account",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20.h),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
-                },
-                child: Text("Login", style: TextStyle(color: const Color(0xFF3DDC97), fontSize: 25.sp)),
-              ),
-            ],
+
+                SizedBox(height: 20.h),
+
+                /// Go to Login
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  },
+                  child: Text(
+                    "Login",
+                    style: TextStyle(
+                      color: const Color(0xFF3DDC97),
+                      fontSize: 20.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
