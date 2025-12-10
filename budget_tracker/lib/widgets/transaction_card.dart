@@ -34,28 +34,23 @@ class TransactionCard extends StatelessWidget {
 }
 
 class RecentTransactionList extends StatelessWidget {
-  RecentTransactionList({
-    super.key,
-  });
+  RecentTransactionList({super.key});
 
   final _userId = FirebaseAuth.instance.currentUser?.uid;
+  final _transactionService = TransactionService();
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(_userId)
-          .collection("transactions")
-          .orderBy("timestamp", descending: true)
-          .limit(20)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      stream: _transactionService.getRecentTransactions(_userId!),
+      builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Text('Something went wrong');
-        } else if (snapshot.connectionState == ConnectionState.waiting) {
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Center(child: Text("No transactions found"));
         }
 
@@ -66,10 +61,7 @@ class RecentTransactionList extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: data.length,
           itemBuilder: (context, index) {
-            var cardData = data[index];
-            return TransactionItem(
-              data: cardData,
-            );
+            return TransactionItem(data: data[index]);
           },
         );
       },
@@ -196,28 +188,6 @@ class TransactionItem extends StatelessWidget {
 
                     SizedBox(height: 4.h),
 
-                    // BALANCE ROW
-                    Row(
-                      children: [
-                        Text(
-                          "Balance",
-                          style: TextStyle(
-                            color: CupertinoColors.systemGrey,
-                            fontSize: 14.sp,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          "\$ ${data["remainingAmount"]}",
-                          style: TextStyle(
-                            color: CupertinoColors.systemGrey3,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 4.h),
 
                     // DATE
                     Text(

@@ -1,5 +1,5 @@
 import 'package:budget_tracker/widgets/category_list.dart';
-import 'package:budget_tracker/widgets/time_line_month.dart';
+import 'package:budget_tracker/widgets/time_line.dart';
 import 'package:budget_tracker/widgets/type_tab_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +46,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   SizedBox(height: 15.h),
 
                   /// Month Timeline
-                  TimeLineMonth(
+                  TimeLine(
                     onChanged: (value) {
                       if (value != null) {
                         setState(() => monthYear = value);

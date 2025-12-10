@@ -124,15 +124,7 @@ class AuthService {
       for (var doc in transactions.docs) {
         await doc.reference.delete();
       }
-
-      // 2. Reset các trường số liệu
-      await userDoc.update({
-        "remainingAmount": 0,
-        "totalCredit": 0,
-        "totalDebit": 0,
-      });
-
-      // Thành công
+      
       return true;
     } catch (e) {
       // Lỗi

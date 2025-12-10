@@ -14,36 +14,14 @@ class TransactionService {
     required int amount,
     required String type,
     required String category,
+    required String monthYear
   }) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user logged in');
 
     int timestamp = DateTime.now().millisecondsSinceEpoch;
-    DateTime date = DateTime.now();
-    String monthYear = DateFormat("MMM y").format(date);
-
     var id = _uid.v4();
 
-    final userDoc = await _fireStore.collection("users").doc(user.uid).get();
-
-    int remainingAmount = userDoc["remainingAmount"];
-    int totalCredit = userDoc["totalCredit"];
-    int totalDebit = userDoc["totalDebit"];
-
-    if (type == "credit") {
-      remainingAmount += amount;
-      totalCredit += amount;
-    } else {
-      remainingAmount -= amount;
-      totalDebit += amount;
-    }
-
-    await _fireStore.collection("users").doc(user.uid).update({
-      "remainingAmount": remainingAmount,
-      "totalCredit": totalCredit,
-      "totalDebit": totalDebit,
-      "updateAt": timestamp,
-    });
 
     await _fireStore
         .collection("users")
@@ -56,9 +34,6 @@ class TransactionService {
       "amount": amount,
       "type": type,
       "timestamp": timestamp,
-      "totalCredit": totalCredit,
-      "totalDebit": totalDebit,
-      "remainingAmount": remainingAmount,
       "monthYear": monthYear,
       "category": category,
     });
@@ -69,44 +44,6 @@ class TransactionService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user logged in');
 
-    final transactionDoc = await _fireStore
-        .collection("users")
-        .doc(user.uid)
-        .collection("transactions")
-        .doc(transactionId)
-        .get();
-
-    if (!transactionDoc.exists) {
-      throw Exception("Transaction not found");
-    }
-
-    final data = transactionDoc.data()!;
-    final int amount = data["amount"];
-    final String type = data["type"];
-
-    final userDocRef = _fireStore.collection("users").doc(user.uid);
-    final userDoc = await userDocRef.get();
-
-    int remainingAmount = userDoc["remainingAmount"];
-    int totalCredit = userDoc["totalCredit"];
-    int totalDebit = userDoc["totalDebit"];
-
-    // Cập nhật lại các tổng
-    if (type == "credit") {
-      remainingAmount -= amount;
-      totalCredit -= amount;
-    } else {
-      remainingAmount += amount;
-      totalDebit -= amount;
-    }
-
-    await userDocRef.update({
-      "remainingAmount": remainingAmount,
-      "totalCredit": totalCredit,
-      "totalDebit": totalDebit,
-      "updateAt": DateTime.now().millisecondsSinceEpoch,
-    });
-
     // Xóa transaction
     await _fireStore
         .collection("users")
@@ -114,5 +51,69 @@ class TransactionService {
         .collection("transactions")
         .doc(transactionId)
         .delete();
+  }
+
+
+  Stream<Map<String, double>> getMonthlyTotals({
+    required String userId,
+    required String monthYear,
+  }) {
+    return _fireStore
+        .collection('users')
+        .doc(userId)
+        .collection('transactions')
+        .where('monthYear', isEqualTo: monthYear)
+        .snapshots()
+        .map((snapshot) {
+      double credit = 0;
+      double debit = 0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final amount = (data['amount'] ?? 0).toDouble();
+        final type = (data['type'] ?? '');
+
+        if (type == 'credit') credit += amount;
+        if (type == 'debit') debit += amount;
+      }
+
+      return {
+        'credit': credit,
+        'debit': debit,
+        'remaining': credit - debit,
+      };
+    });
+  }
+
+  Stream<QuerySnapshot> getRecentTransactions(String userId) {
+    return _fireStore
+        .collection('users')
+        .doc(userId)
+        .collection('transactions')
+        .orderBy("timestamp", descending: true)
+        .limit(50)
+        .snapshots();
+  }
+
+
+  Future<QuerySnapshot> getFilteredTransactions({
+    required String userId,
+    required String monthYear,
+    required String type,
+    required String category,
+  }) {
+    Query query = _fireStore
+        .collection('users')
+        .doc(userId)
+        .collection("transactions")
+        .orderBy("timestamp", descending: true)
+        .where("monthYear", isEqualTo: monthYear)
+        .where("type", isEqualTo: type);
+
+    if (category != "All") {
+      query = query.where("category", isEqualTo: category);
+    }
+
+    return query.limit(100).get();
   }
 }

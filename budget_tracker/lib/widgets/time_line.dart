@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-class TimeLineMonth extends StatefulWidget {
-  const TimeLineMonth({super.key, required this.onChanged});
+class TimeLine extends StatefulWidget {
+  const TimeLine({super.key, required this.onChanged});
   final ValueChanged<String?> onChanged;
 
   @override
-  State<TimeLineMonth> createState() => _TimeLineMonthState();
+  State<TimeLine> createState() => _TimeLineState();
 }
 
-class _TimeLineMonthState extends State<TimeLineMonth> {
+class _TimeLineState extends State<TimeLine> {
   String currentMonth = "";
   List<String> months = [];
   final ScrollController _scrollController = ScrollController();

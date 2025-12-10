@@ -3,7 +3,7 @@ import 'package:budget_tracker/screens/dashboard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../screens/login.dart';
+import '../screens/login_screen.dart';
 import '../services/auth_service.dart';
 import '../utils/confirm_dialog.dart';
 import '../utils/password_dialog.dart';

@@ -2,9 +2,11 @@ import 'package:budget_tracker/widgets/category_dropdown.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../services/transaction_service.dart';
 import '../utils/app_validator.dart';
 import '../utils/show_app_dialog.dart';
+import 'month_dropdown.dart';
 
 
 class AddTransactionForm extends StatefulWidget {
@@ -19,7 +21,16 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
 
   String _type = "credit"; // PHẢI đúng key “credit” hoặc “debit”
   String _category = "Others";
+  String _selectedMonth = "";
   bool _isLoader = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    DateTime now = DateTime.now();
+    _selectedMonth = DateFormat("MMM y").format(now);
+  }
 
   final TextEditingController _amountEditController = TextEditingController();
   final TextEditingController _titleEditController = TextEditingController();
@@ -34,6 +45,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
           amount: int.parse(_amountEditController.text),
           type: _type,
           category: _category,
+          monthYear: _selectedMonth
         );
 
         if (!mounted) return;
@@ -92,6 +104,17 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                     if (value != null) setState(() => _category = value);
                   },
                 ),
+                SizedBox(height: 10.h),
+                MonthDropdown(
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedMonth = value;   // bạn lưu lại giá trị đã chọn
+                      });
+                    }
+                  },
+                ),
+
                 SizedBox(height: 15.h),
 
                 /// FIXED — SegmentedControl credit/debit

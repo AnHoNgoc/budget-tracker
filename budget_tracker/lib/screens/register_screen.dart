@@ -1,4 +1,4 @@
-import 'package:budget_tracker/screens/login.dart';
+import 'package:budget_tracker/screens/login_screen.dart';
 import 'package:budget_tracker/services/auth_service.dart';
 import 'package:budget_tracker/utils/app_validator.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,14 +9,14 @@ import '../utils/show_app_dialog.dart';
 import '../utils/show_app_dialog_auto_close.dart';
 
 
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _userNameController = TextEditingController();

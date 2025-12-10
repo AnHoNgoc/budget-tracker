@@ -1,5 +1,5 @@
 
-import 'package:budget_tracker/screens/sign_up.dart';
+import 'package:budget_tracker/screens/register_screen.dart';
 import 'package:budget_tracker/utils/app_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      CupertinoPageRoute(builder: (_) => const SignUpScreen()),
+                      CupertinoPageRoute(builder: (_) => const RegisterScreen()),
                     );
                   },
                   child: Text(
