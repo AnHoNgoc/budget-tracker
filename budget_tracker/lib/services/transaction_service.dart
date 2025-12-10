@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class TransactionService {
@@ -9,19 +8,17 @@ class TransactionService {
   final _uid = const Uuid();
 
   // Hàm thêm transaction (của bạn)
-  Future<void> addTransaction({
-    required String title,
-    required int amount,
-    required String type,
-    required String category,
-    required String monthYear
-  }) async {
+  Future<void> addTransaction(
+      {required String title,
+      required int amount,
+      required String type,
+      required String category,
+      required String monthYear}) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user logged in');
 
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     var id = _uid.v4();
-
 
     await _fireStore
         .collection("users")
@@ -52,7 +49,6 @@ class TransactionService {
         .doc(transactionId)
         .delete();
   }
-
 
   Stream<Map<String, double>> getMonthlyTotals({
     required String userId,
@@ -94,7 +90,6 @@ class TransactionService {
         .limit(50)
         .snapshots();
   }
-
 
   Future<QuerySnapshot> getFilteredTransactions({
     required String userId,
