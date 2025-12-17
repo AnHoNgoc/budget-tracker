@@ -19,8 +19,7 @@ class AddTransactionForm extends StatefulWidget {
 class _AddTransactionFormState extends State<AddTransactionForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  String _type = "credit"; // PHẢI đúng key “credit” hoặc “debit”
-  String _category = "Others";
+  String _type = "credit";
   String _selectedMonth = "";
   bool _isLoader = false;
 
@@ -44,7 +43,6 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
           title: _titleEditController.text,
           amount: int.parse(_amountEditController.text),
           type: _type,
-          category: _category,
           monthYear: _selectedMonth
         );
 
@@ -97,13 +95,6 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                 ),
                 SizedBox(height: 10.h),
 
-                /// Category
-                CategoryDropdown(
-                  categoryType: _category,
-                  onChanged: (value) {
-                    if (value != null) setState(() => _category = value);
-                  },
-                ),
                 SizedBox(height: 10.h),
                 MonthDropdown(
                   onChanged: (value) {
@@ -121,9 +112,9 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                 CupertinoSegmentedControl<String>(
                   padding: EdgeInsets.symmetric(vertical: 10.h),
                   groupValue: _type,
-                  selectedColor: const Color(0xFF5E00B8),
+                  selectedColor: const Color(0xFF1C1C1E),
                   unselectedColor: Colors.white,
-                  borderColor: const Color(0xFF5E00B8),
+                  borderColor: const Color(0xFF1C1C1E),
                   children: {
                     "credit": Padding(
                       padding: EdgeInsets.all(12.h),

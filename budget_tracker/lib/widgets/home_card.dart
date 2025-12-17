@@ -50,7 +50,7 @@ class HomeCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black12,
             blurRadius: 8.r,
-            offset: Offset(0, 3.h),
+            offset: const Offset(0, -3), // 🔼 đổ bóng lên trên
           ),
         ],
       ),

@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class TransactionService {
@@ -13,7 +12,6 @@ class TransactionService {
     required String title,
     required int amount,
     required String type,
-    required String category,
     required String monthYear
   }) async {
     final user = _auth.currentUser;
@@ -35,7 +33,6 @@ class TransactionService {
       "type": type,
       "timestamp": timestamp,
       "monthYear": monthYear,
-      "category": category,
     });
   }
 

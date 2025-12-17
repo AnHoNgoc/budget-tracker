@@ -63,7 +63,7 @@ class _TimeLineState extends State<TimeLine> {
               margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 10.h),
               decoration: BoxDecoration(
                 color: currentMonth == months[index]
-                    ? Colors.blue.shade900
+                    ? const Color(0xFF1C1C1E)
                     : Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(24.r), // To hơn
               ),
@@ -75,7 +75,7 @@ class _TimeLineState extends State<TimeLine> {
                     fontWeight: FontWeight.w500,
                     color: currentMonth == months[index]
                         ? Colors.white
-                        : Colors.purple,
+                        : Colors.black87,
                   ),
                 ),
               ),

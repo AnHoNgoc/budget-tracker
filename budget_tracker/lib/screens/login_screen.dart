@@ -1,5 +1,6 @@
 
 import 'package:budget_tracker/screens/register_screen.dart';
+import 'package:budget_tracker/screens/reset_password_screen.dart';
 import 'package:budget_tracker/utils/app_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -97,7 +98,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   isPassword: true,
                   validator: AppValidator.validatePassword,
                 ),
-                SizedBox(height: 40.h),
+                SizedBox(height: 8.h),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero, // để sát vào phải
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(builder: (_) => const ResetPasswordScreen()),
+                      );
+                    },
+                    child: Text(
+                      "Forgot password?",
+                      style: TextStyle(
+                        color: Colors.blue, // màu xanh dương
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.h),
                 SizedBox(
                   height: 55.h,
                   child: CupertinoButton.filled(

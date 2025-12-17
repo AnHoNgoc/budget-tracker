@@ -77,7 +77,6 @@ class TransactionItem extends StatelessWidget {
   });
 
   final dynamic data;
-  final _appIcon = AppIcons();
   final TransactionService _transactionService = TransactionService();
 
   Future<void> _handleDelete(BuildContext context) async {
@@ -133,25 +132,6 @@ class TransactionItem extends StatelessWidget {
           child: Row(
             children: [
               // ICON BOX
-              Container(
-                width: 70.w,
-                height: 70.w,
-                decoration: BoxDecoration(
-                  color: isCredit
-                      ? CupertinoColors.activeGreen.withOpacity(0.15)
-                      : CupertinoColors.systemRed.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                child: Center(
-                  child: Icon(
-                    _appIcon.getExpenseCategoryIcons("${data["category"]}"),
-                    color: isCredit
-                        ? CupertinoColors.activeGreen
-                      : CupertinoColors.systemRed,
-                    size: 24.sp,
-                  ),
-                ),
-              ),
 
               SizedBox(width: 14.w),
 

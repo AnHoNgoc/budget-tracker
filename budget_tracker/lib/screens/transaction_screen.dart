@@ -30,7 +30,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
         middle: Text(
-          "Expenses",
+          "Detail",
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 25.sp),
         ),
       ),
@@ -50,17 +50,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     onChanged: (value) {
                       if (value != null) {
                         setState(() => monthYear = value);
-                      }
-                    },
-                  ),
-
-                  SizedBox(height: 10.h),
-
-                  /// Category List
-                  CategoryList(
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => category = value);
                       }
                     },
                   ),

@@ -19,8 +19,8 @@ class _DashboardState extends State<Dashboard> {
   final String _userId = FirebaseAuth.instance.currentUser!.uid;
 
   late final List<Widget> _pages =  [
-    HomeScreen(),
-    TransactionScreen(),
+    const HomeScreen(),
+    const TransactionScreen(),
     ChartScreen(userId: _userId)
   ];
   int _currentIndex = 0;
@@ -53,9 +53,10 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       body: Stack(
         children: [
+          // 1️⃣ Nội dung page
           _pages[_currentIndex],
 
-          // Confetti rơi từ giữa màn hình
+          // 2️⃣ Confetti (giữ nguyên)
           if (_confettiController != null)
             Positioned(
               top: 0,
@@ -65,21 +66,21 @@ class _DashboardState extends State<Dashboard> {
                 alignment: Alignment.topCenter,
                 child: ConfettiWidget(
                   confettiController: _confettiController!,
-                  blastDirection: pi / 2, // rơi thẳng xuống
-                  emissionFrequency: 0.02, // giảm tần suất sinh hạt → nhẹ hơn
-                  numberOfParticles: 30,   // ít hạt hơn → rơi nhẹ
-                  maxBlastForce: 5,        // lực tối đa thấp
-                  minBlastForce: 2,        // lực tối thiểu thấp
-                  gravity: 0.1,            // rơi chậm hơn
+                  blastDirection: pi / 2,
+                  emissionFrequency: 0.02,
+                  numberOfParticles: 30,
+                  maxBlastForce: 5,
+                  minBlastForce: 2,
+                  gravity: 0.1,
                   shouldLoop: false,
                   colors: const [
                     Colors.green,
                     Colors.blue,
                     Colors.pink,
                     Colors.orange,
-                    Colors.purple
+                    Colors.purple,
                   ],
-                  particleDrag: 0.02,      // rơi tự nhiên hơn
+                  particleDrag: 0.02,
                 ),
               ),
             ),
