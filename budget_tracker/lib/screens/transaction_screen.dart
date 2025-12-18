@@ -1,4 +1,3 @@
-import 'package:budget_tracker/widgets/category_list.dart';
 import 'package:budget_tracker/widgets/time_line.dart';
 import 'package:budget_tracker/widgets/type_tab_bar.dart';
 import 'package:flutter/cupertino.dart';
